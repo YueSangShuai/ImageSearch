@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+logs/
+embeddings/
+SYNTH-PEDES/
+google/siglip2-so400m-patch16-512/
+facebook/MEXMA/
+mexma-siglip2/
+*.onnx
+*.pt
+*.png
+*.jpg
+*.jpeg
+*.json
+*.npy
+*.txt
+*.pyc

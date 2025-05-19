@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <header class="my-4">
+            <h1 class="text-center">{{ title }}</h1>
+        </header>
+
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="text-search-tab" data-bs-toggle="tab" data-bs-target="#text-search" type="button" role="tab" aria-controls="text-search" aria-selected="true">文本搜索</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="image-search-tab" data-bs-toggle="tab" data-bs-target="#image-search" type="button" role="tab" aria-controls="image-search" aria-selected="false">以图搜图</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="myTabContent">
+                    <!-- 文本搜索 Tab -->
+                    <div class="tab-pane fade show active" id="text-search" role="tabpanel" aria-labelledby="text-search-tab">
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="query-input" class="form-control" placeholder="输入行人的描述...">
+                                    <button class="btn btn-primary" type="button" id="search-button">查询</button>
+                                    <button class="btn btn-secondary" type="button" id="clear-button">清除</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="shortcut-buttons">
+                                    {% for shortcut in shortcuts %}
+                                    <button class="btn btn-outline-primary shortcut-btn me-2 mb-2" data-query="{{ shortcut }}">{{ shortcut }}</button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Top K</span>
+                                    <input type="number" id="top-k" class="form-control" value="10" min="1" max="20">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Threshold</span>
+                                    <input type="number" id="threshold" class="form-control" value="0.1" min="0" max="1" step="0.05">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">多库搜索</span>
+                                    <div id="collection-checkboxes" class="form-control d-flex flex-wrap">
+                                        <!-- 集合复选框将通过JavaScript动态添加 -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">查询信息</span>
+                                    <input type="text" id="record-count" class="form-control" value="注册图片数量: {{ record_count }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="loading-indicator" class="text-center d-none">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>正在搜索，请稍候...</p>
+                                </div>
+                                <div id="gallery-container" class="gallery-container">
+                                    <!-- Gallery items will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 以图搜图 Tab -->
+                    <div class="tab-pane fade" id="image-search" role="tabpanel" aria-labelledby="image-search-tab">
+                        <div class="row mt-4">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">上传包含行人的图片</div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <input class="form-control" type="file" id="image-upload" accept="image/*">
+                                        </div>
+                                        <div id="preview-container" class="text-center d-none">
+                                            <img id="preview-image" class="img-fluid mb-3" src="" alt="Preview">
+                                            <div class="d-flex justify-content-center">
+                                                <button class="btn btn-primary me-2" id="image-search-button">检测并搜索</button>
+                                                <button class="btn btn-secondary" id="image-clear-button">清除</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">样例图片</div>
+                                    <div class="card-body">
+                                        <div class="sample-images">
+                                            {% for sample in samples %}
+                                            <div class="sample-image-container mb-2">
+                                                <img src="{{ sample }}" class="img-thumbnail sample-image" data-path="{{ sample }}" alt="Sample {{ loop.index }}">
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3 mb-3">
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Top K</span>
+                                    <input type="number" id="image-top-k" class="form-control" value="10" min="1" max="20">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Threshold</span>
+                                    <input type="number" id="image-threshold" class="form-control" value="0.5" min="0" max="1" step="0.05">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Person Threshold</span>
+                                    <input type="number" id="person-threshold" class="form-control" value="0.6" min="0.4" max="1" step="0.05">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">多库搜索</span>
+                                    <div id="image-collection-checkboxes" class="form-control d-flex flex-wrap">
+                                        <!-- 集合复选框将通过JavaScript动态添加 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="image-loading-indicator" class="text-center d-none">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>正在检测和搜索，请稍候...</p>
+                                </div>
+                                <div id="image-gallery-container" class="gallery-container">
+                                    <!-- Gallery items will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Section (Hidden by default) -->
+    <div class="modal fade" id="adminModal" tabindex="-1" aria-labelledby="adminModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adminModalLabel">数据库管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="image-dir" class="form-label">图片目录路径</label>
+                        <input type="text" class="form-control" id="image-dir" placeholder="/path/to/images">
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">类别</label>
+                        <input type="text" class="form-control" id="category" value="person">
+                    </div>
+                    <div class="alert alert-info" id="register-status" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="register-btn">注册图片</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modal-image" class="img-fluid" src="" alt="Full size image">
+                    <p id="modal-caption" class="mt-2"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
