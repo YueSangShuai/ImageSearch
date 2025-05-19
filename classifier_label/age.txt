@@ -1,0 +1,111 @@
+
+我们来生成年龄的词语或句子。人生五个阶段的年龄划分
+
+1. 童年期：0-12岁
+   - 成长发育、基础学习、依赖家庭
+
+2. 青少年期：13-19岁
+   - 青春发育、自我探索、学业为主
+
+3. 青年期：20-39岁
+   - 职业起步、家庭建立、社会融入
+
+4. 中年期：40-59岁
+   - 事业巅峰、养育子女、承上启下
+
+5. 老年期：60岁以上
+   - 退休生活、健康管理、智慧传承
+
+我们提出对应的描述行人的词语或句子为：
+0~12岁的人 <-> 13~19岁的人 <-> 20~39岁的人 <-> 40~60岁的人 <-> 60岁以上的人
+婴幼儿 <-> 青少年 <-> 青年人 <-> 中年人 <-> 老年人
+
+请继续完成40组中文和40组英文词语或句子，输出的每一行应包括完整的5个年龄段，用来描述各个年龄段的行人。
+严格按" <-> "分隔五个年龄段，每行覆盖完整生命周期阶段，并强化场景多样性与年龄特征精准性：
+---
+
+### 中文组完整40组
+1.  蹒跚学步的婴孩 <-> 校服褶皱的中学生 <-> 西装革履的职场新人 <-> 拎公文包的公司主管 <-> 晨练打太极的长者
+2.  舔棒棒糖的幼童 <-> 戴耳机听歌的青少年 <-> 推婴儿车的年轻妈妈 <-> 周末垂钓的POLO衫大叔 <-> 公园长椅上喂鸽子的老人
+3.  摔跤后哭鼻子的幼儿园生 <-> 篮球场喝彩的高中生 <-> 挤地铁刷简历的求职者 <-> 叮嘱孩子写作业的父亲 <-> 菜场讨价还价的银发奶奶
+4.  抓玩具车的男童 <-> 奶茶店自拍的少女 <-> 健身房撸铁的打工族 <-> 跳广场舞的活力阿姨 <-> 老年大学写生的退休教师
+5.  背卡通书包的小学生 <-> 深夜刷题的初三学生 <-> 咖啡馆敲键盘的自由职业者 <-> 送孩子补课的焦虑家长 <-> 遛狗哼戏的退休大爷
+6.  骑平衡车的孩子 <-> 滑板翻板的叛逆少年 <-> 穿制服送快递的小哥 <-> 旅游大巴拍照的中年夫妻 <-> 拄拐杖缓行的老奶奶
+7.  趴地看蚂蚁的顽童 <-> 图书馆备考的高三生 <-> 夜市摆摊的创业情侣 <-> 健身房测血压的养生党 <-> 寺庙祈福的白发爷爷
+8.  吹生日蜡烛的女孩 <-> 校门口抽烟的逃课生 <-> 抱会议资料的职场女性 <-> 超市抢折扣的买菜大妈 <-> 合唱团练声的银发族
+9.  裹围嘴的学步婴儿 <-> 球场挥汗的校队队长 <-> 地铁补觉的程序员 <-> 家长会发言的精英父亲 <-> 公园下棋的退休工人
+10. 游乐场尖叫的孩童 <-> 网吧组队游戏的少年 <-> 骑共享单车的外卖员 <-> 摄影协会采风的摄影大叔 <-> 摇扇纳凉的胡同老人
+11. 踩水坑溅湿裙子的女童 <-> 化学实验室吐槽器材的理科生 <-> 深夜改方案的广告策划 <-> 车载导航出错的滴滴司机 <-> 社区义诊量血压的老军医
+12. 动物园指认狮子的小游客 <-> 校刊编辑赶稿的眼镜妹 <-> 直播卖货的网红主播 <-> 家长群转发鸡汤的班主任 <-> 老粮站改建跳舞的厂矿工人
+13. 拼乐高卡住的鼻涕娃 <-> 追星族抱应援旗的初中女生 <-> 赶高铁看客户的销售经理 <-> 宣传栏贴公告的社区干部 <-> 旧书摊翻连环画的退伍老兵
+14. 被气球吓哭的宝宝 <-> 校广播站读稿的播音员 <-> 交房现场维权的业主代表 <-> 相亲角举牌的海归母亲 <-> 早市卖自制辣酱的独居婆婆
+15. 游乐园走丢的卷发男孩 <-> 课间偷传纸条的早恋生 <-> 棚拍婚纱照的准新郎 <-> 股票大厅盯盘的秃顶股民 <-> 老年旅游团拍丝巾照的阿姨
+16. 扎双马尾练钢琴的琴童 <-> 网吧通宵刷副本的留级生 <-> 星巴克改PPT的实习生 <-> 辅导机构推销课程的顾问 <-> 党史馆义务讲解的老党员
+17. 幼儿园手工课折纸的萌娃 <-> 小卖部门口赊账的刺头学生 <-> 体检中心排队测脂肪肝的白领 <-> 渔具店挑选饵料的钓鱼佬 <-> 老年食堂分餐的社区义工
+18. 抓周抓到计算器的周岁娃 <-> 升旗仪式护旗的优等生 <-> 深夜急诊室值班的规培医生 <-> 朋友圈晒登山照的油腻大叔 <-> 公交让座被拒的自嘲老太
+19. 咬奶嘴看动画片的婴儿 <-> 宿舍违规煮泡面的寄宿生 <-> 婚介所填表的母胎单身 <-> 抗糖打卡失败的中年主妇 <-> 社区诗歌比赛评委会老教授
+20. 被跳绳绊倒的小班女孩 <-> 动漫展COS角色的职高生 <-> 试用期焦虑的新手奶爸 <-> 保险公司签单的业务主任 <-> 老年合唱团领唱的原文工团员
+21. 校车迟到大哭的学前儿童 <-> 偷改试卷分数的课代表 <-> 婚礼上喝醉酒的伴郎 <-> 自驾川藏线抛锚的驴友夫妻 <-> 碑林拓印古文的老书法家
+22. 水池放纸船的天真孩童 <-> 运动会跑接力摔跤的体育生 <-> 租房遭遇黑中介的应届生 <-> 家长群攀比家委会的富太太 <-> 老年交谊舞比赛的探戈搭档
+23. 生日宴抹蛋糕的调皮鬼 <-> 背书到抓狂的文科复读生 <-> 凌晨加班猝死的程序员（警示案例）<-> 信访办排队递交材料的访民 <-> 养老院阳台发呆的孤寡老人
+24. 溜冰场摔破膝盖的小学生 <-> 考场传纸条被监考逮住 <-> 售楼处算房贷的刚需情侣 <-> 艾灸馆拔罐熏蒸的养生客 <-> 拆迁村口晒太阳的拾荒老汉
+25. 动物园骑假老虎的童萌娃 <-> 实验室炸试管被骂的研究生 <-> CBD咖啡厅改BP的创业者 <-> 家长群求代购奶粉的全职妈妈 <-> 文玩市场挑手串的四眼收藏家
+26. 泳池套浮袖扑腾的旱鸭子 <-> 天台上模仿偶像剧的青春三人组 <-> 地铁口扫码求关注的地推 <-> 同学会炫车钥匙的暴发户 <-> 佛堂抄经的旗袍老太太
+27. 水族馆贴玻璃喊鱼的小娃 <-> 志愿表与父母吵架的准大学生 <-> ICU外签知情书的家属 <-> 和90后主管顶嘴的被裁员工 <-> 宠物殡葬店安慰客人的退休兽医
+28. 琴行试吉他够不到把位的孩子 <-> 打工挣学费的暑期餐厅小妹 <-> 怕失业考公的私企中层 <-> 短视频晒孙子的新晋奶奶 <-> 赞助希望小学的爱心企业家（老年）
+29. 贪玩被罚站的二年级生 <-> 毕业季醉酒砸酒瓶的兄弟团 <-> 产房外发抖的准爸爸 <-> 癌症互助群群主 <-> 临终关怀病房签遗嘱的老教授
+30. 摸仙人掌扎哭的幼儿园生 <-> 二手平台卖课本的毕业生 <-> 离婚冷静期僵持的夫妇 <-> 凌晨KTV嘶吼的中年危机男 <-> 老年摇滚乐队弹贝斯的白发主唱
+31. 游学团走丢的外向小学生 <-> 地铁乞讨的假学生骗子 <-> 房产中介门口跳操的销售组 <-> 骑行西藏晒脱皮的老驴友 <-> 侨乡祠堂主持祭祖的百岁太公
+32. 绘本馆讲故事的志愿者小姐姐（12岁）<-> 食堂插队被骂哭的住校生 <-> 上门闹离婚的跟踪狂前夫 <-> 保健品讲座领鸡蛋的老人（反讽）<-> 养老院教剪纸的退休美院教授
+33. 手工课做陶艺的童趣班（集体）<-> 校辩论赛一辩的学霸少女 <-> 因AI失业的客服主管 <-> 给流浪猫搭窝的社区阿姨 <-> 老兵纪念馆擦勋章的抗美援朝老兵
+34. 春游摘草莓弄脏裙子的女孩 <-> 宿舍养宠物被处分的寝室长 <-> 网贷逾期遭催收的打工青年 <-> 相亲角写百万年薪的抠脚大汉 <-> 非遗传承人收徒的苏绣大师
+35. 学轮滑摔护具的倔强小子 <-> 艺考画室削铅笔的复读生 <-> 外卖超时道歉的小哥 <-> 带着公仔上班的二次元程序员（40岁反差） <-> 广场书法写地书的鹤发老者
+36. 玩具反斗城撒泼打滚的熊孩子 <-> 网恋面基被鸽的技校男生 <-> 当街抓小三的原配 <-> 佛系参加家长会的摆烂父亲 <-> 社区疫苗接种排队的归国老华侨
+37. 作文比赛编悲惨故事的神童 <-> 直播连麦骂黑粉的主播小妹 <-> 街头卖唱攒手术费的流浪歌手 <-> 整容失败维权的中年网红 <-> 长途大巴返乡的农民工老夫妇
+38. 幼儿园午睡尿床的小哭包 <-> 打耳洞发炎的叛逆少女 <-> 深夜看户型图的北漂情侣 <-> 中年考潜水证的离异富婆 <-> 养老院护理员推轮椅的独臂老兵
+39. 少年宫合唱团领唱的小百灵 <-> 偷偷文身的职校不良生 <-> 相亲吐槽妈宝男的剩女 <-> 放生矿泉水的大佛系居士（反讽）<-> 老年大学古筝班的退休银行行长
+40. 咬手指算数题的一年级生 <-> 保送清华被举报的竞赛生（冲突）<-> 回乡养多肉的前大厂员工 <-> 假装胃癌骗捐款的骗子（负面案例）<-> 101岁仍每天读报的老红军
+
+---
+
+### 英文组完整40组
+1. A toddler clutching a teddy <-> Teenagers in hoodies skateboarding <-> A commuter scrolling LinkedIn <-> A dad coaching Little League <-> Elderly couples feeding ducks
+2. Babies crawling on grass <-> High schoolers vaping behind shops <-> Freelancers typing in co-working spaces <-> Middle-aged joggers with Fitbits <-> Grandpas playing chess in the park
+3. Kids chasing ice cream trucks <-> Students cramming for finals <-> Delivery riders weaving through traffic <-> Moms carpooling to soccer practice <-> Retirees line dancing at dawn
+4. A boy building sandcastles <-> TikTok-dancing teens at malls <-> Nurses rushing to hospitals <-> Executives stuck in Zoom meetings <-> Grandmas knitting on porches
+5. Girls twirling in princess dresses <-> Gamers shouting in internet cafes <-> Baristas steaming lattes <-> Dads grilling at backyard BBQs <-> Old men flying model airplanes
+6. Children splashing in puddles <-> Prom dates taking selfies <-> Construction workers hauling tools <-> Yoga moms in Lululemon <-> Seniors feeding stray cats
+7. Toddlers napping in strollers <-> Skateboarders ollieing stairs <-> Entrepreneurs pitching VCs <-> Middle-aged cyclists in Lycra <-> Gardening retirees in sunhats
+8. Kids waving balloon animals <-> Band geeks carrying instrument cases <-> Taxi drivers blaring radios <-> PTA moms organizing bake sales <-> Birdwatching elders with binoculars
+9. Babies giggling at peek-a-boo <-> Fencers lugging gear bags <-> Graphic designers cursing deadlines <-> Dads coaching robotics teams <-> Tai chi masters in silk robes
+10. Twins fighting over toys <-> Theater kids rehearsing scripts <-> Mechanics wiping greasy hands <-> Book club ladies swapping novels <-> Grandpas flying vintage drones
+11. Kindergarteners finger-painting <-> Debate team captains giving speeches <-> Bike couriers dodging traffic <-> Divorce lawyers reviewing paperwork <-> Retirees attending piano recitals
+12. Siblings squabbling over Legos <-> Teens spray-parking garage walls <-> Flight attendants adjusting uniforms <-> Truck drivers chugging energy drinks <-> Veterans sharing war stories
+13. Kids licking melting popsicles <-> Chemistry lab partners mixing solutions <-> Street musicians playing saxophones <-> Real estate agents staging homes <-> Quilting circle grandmas gossiping
+14. A girl chasing fireflies <-> Mathletes solving equations <-> Dog walkers juggling leashes <-> Soccer moms honking minivans <-> Old sailors mending fishing nets
+15. Boys trading baseball cards <-> Parkour teens vaulting barriers <-> Bartenders shaking cocktails <-> Divorced dads alimony complaints <-> Retired teachers grading papers
+16. Kids imitating superhero poses <-> Prom committee decorating gyms <-> Nannies pushing twin strollers <-> Midlife-crisis motorcycle buyers <-> Senior chess hustlers in the park
+17. Toddlers refusing naptime <-> College applicants crafting essays <-> Food bloggers snapping brunch <-> Bank managers denying loans <-> Retired cops walking beat nostalgically
+18. Girls begging for puppy adoptions <-> Graffiti crews tagging tunnels <-> Day traders yelling at screens <-> Wine-tasting suburban couples <-> Great-grandmas crocheting booties
+19. Kids building blanket forts <-> Physics Olympiad contenders <-> Street vendors selling umbrellas <-> Bodybuilders flexing at mirrors <-> Retired nurses volunteering at clinics
+20. Babies tasting lemons <-> Hackathon programmers coding <-> Tour guides shouting histories <-> Alumni donors naming buildings <-> Old miners coughing black-lung
+21. Siblings spying on Santa <-> Metalheads at garage bands <-> Conservationists planting trees <-> Immigration lawyers filing appeals <-> Holocaust survivors giving testimonies
+22. Carnival game prize screamers <-> Homecoming queens waving <-> Baristas spelling names wrong <-> Midnight oil-burning novelists <-> WWII vets saluting flags
+23. Kids discovering magic tricks <-> Debt-ridden grad students <-> Struggling actors waiting tables
+Kids building lemonade stands <-> College grads printing résumés <-> Baristas memorizing orders <-> Coaching soccer on weekends <-> Seniors teaching grandson chess
+Toddlers hugging puppies <-> Valedictorians giving speeches <-> Carpenters sawing plywood <-> Prepping school lunch boxes <-> Retired pilots flying simulators
+Siblings fighting over TV remotes <-> Art students sketching nudes <-> Nurses comforting ER patients <-> TikTok dads doing silly dances <-> Old sailors fixing vintage boats
+Kids catching fireflies <-> Gym bros lifting weights <-> Startup founders burning cash <-> Moms planning birthday parties <-> Retired cops walking old beats
+Babies smearing mashed peas <-> Debate club nerds arguing <-> Rideshare drivers navigating maps <-> Weekend gardeners planting roses <-> Grandmas baking apple pies
+Twins dressing identically <-> Skate punks grinding rails <-> Campaigners handing leaflets <-> Dads fixing leaky sinks <-> Seniors playing bingo
+Kids jumping couch cushions <-> Band members tuning guitars <-> Flight attendants rolling carts <-> Coastal retirees fishing piers <-> Retired teachers tutoring kids
+Toddler’s first haircut tantrum <-> Seminar attendees taking notes <-> Farmers harvesting crops <-> Car mechanics checking engines <-> Old typists writing memoirs
+Scribbling crayon masterpieces <-> Archery club aiming targets <-> Journalists chasing deadlines <-> Mall walkers power striding <-> Vets sharing war memories
+Kids begging for bedtime stories <-> Physics TAs grading exams <-> Roofers hammering shingles <-> Divorced dads barbecuing solo <-> Retired DJs spinning vinyls
+Building pillow forts <-> Model UN delegates debating <-> Fishermen mending nets <-> Yoga instructors chanting <-> Great-grandmas quilting
+Splashing in kiddie pools <-> Drama club rehearsing plays <-> Freight train conductors <-> PTA presidents organizing <-> Old poets reciting verses
+Learning to tie shoelaces <-> Archaeology students digging <-> Bakers frosting cupcakes <-> Dads coaching debate teams <-> Retired astronauts giving talks
+First day of school tears <-> Parkour vaulting fences <-> Street artists spray-painting <-> Moms converting vans to campers <-> Retired spies writing memoirs
+Swinging higher shouting "Look!" <-> Coding bootcamp students <-> Librarians shelving books <-> Dads building treehouses <-> Old professors lecturing ghosts
+Chasing soap bubbles <-> Astronomy club stargazing <-> Touring magicians practicing <-> Crafting DIY home decor <-> Retired rockstars mentoring
+Losing first baby tooth <-> Cadets marching in parades <-> Veterinarians stitching wounds <-> Dads sneaking naps on couches <-> Centenarians blowing candles
