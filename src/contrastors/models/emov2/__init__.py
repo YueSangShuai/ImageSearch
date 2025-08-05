@@ -1,0 +1,5 @@
+from contrastors.models.emov2.emo2 import EMO2_1M_k5_hybrid,EMO2_1M_k5_hybrid_256,EMO2_1M_k5_hybrid_512
+from contrastors.models.emov2.emo2 import EMO2_2M_k5_hybrid,EMO2_2M_k5_hybrid_256,EMO2_2M_k5_hybrid_512
+from contrastors.models.emov2.emo2 import EMO2_5M_k5_hybrid,EMO2_5M_k5_hybrid_256,EMO2_5M_k5_hybrid_512
+from contrastors.models.emov2.emo2 import EMO2_20M_k5_hybrid,EMO2_20M_k5_hybrid_256,EMO2_50M_k5_hybrid
+from contrastors.models.emov2.emo2 import MODEL

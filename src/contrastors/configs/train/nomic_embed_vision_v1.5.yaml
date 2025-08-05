@@ -1,0 +1,110 @@
+train_args:
+  num_epochs: 300
+  learning_rate: 1.0e-3
+  weight_decay: 0
+  warmup_steps: 200 
+  cooldown_steps: null
+  checkpoint: null
+  wandb: true
+  wandb_project_name: "nomic"
+  wandb_entity: "yuesang"
+  wandb_run_name: "person"
+  profile: false
+  log_grads_every: 100
+  log_lr_every: 10
+  save_every: 25000
+  eval_steps: 1000
+  eval_strategy: "epochs"
+  chunk_size: 1536
+  # output_dir: "ckpts/facebook/dino-vits8"
+  output_dir: "ckpts/person/dino-vits8"
+  # if using deepspeed, this will be ignored
+  schedule_type: "cosine"
+  max_grad_norm: 1.0
+  adam_beta1: 0.9
+  adam_beta2: 0.95
+  grad_cache: false
+  loss_fn: "clip"
+  add_l2_loss: false
+  pretrained: null
+  pooling: "last"
+  use_fp8: false
+  clamp_logits: false 
+  logit_max: 100
+
+data_args:
+  image_text_shards: "/data/yuesang/LLM/contrastors/data/train.json"
+  eval_flickr: false
+  # (TODO): zanussbaum up workers and check deterministic
+  workers: 8 
+  # this is per gpu batch size
+  batch_size: 2048
+  eval_batch_size: 2048
+  seed: 42
+  shuffle: false
+  imagenet_val_path: "/data/yuesang/LLM/contrastors/data/val.json"
+  dataset_resampled: false
+  is_local: true
+
+model_args:
+  model_type: "locked_text"
+
+text_model_args:
+  model_type: "locked_text"
+  seq_len: 77
+  model_name: "/data/yuesang/LLM/VectorIE/models/nomic/nomic-embed-text-v1.5"
+  tokenizer_name: "/data/yuesang/LLM/VectorIE/models/nomic/nomic-embed-text-v1.5"
+  pooling: "mean"
+  freeze: true
+  add_prefix: true
+  projection_dim: null
+  nomic_encoder: true
+  pretrained: true
+  ema: false
+  precomputed: false
+  hamming: true
+
+vision_model_args:
+  model_type: "locked_text"
+  model_name: "nomic-ai/vit_eva02_base_patch16_224.mim_in22k"
+  pretrained: true
+  pooling: "map"
+  freeze: false
+  nomic_encoder: false
+  logit_scale: null
+  trainable_logit_scale: true
+  gradient_checkpointing: true
+  projection_dim: 768
+
+transforms:
+  image_size: 224
+
+
+classiffer_config:
+  open: True
+  classes: {
+
+
+
+    age: {
+    nc: 5,
+    classes_dict: {
+
+    },
+    text_en: {
+    "ageless15": "this is a person under 15 years old",
+    "age16-30": "this is a person between 16 and 30 years old",
+    "age31-45": "this is a person between 31 and 45 years old",
+    "age46-60": "this is a person between 46 and 60 years old",
+    "ageabove60": "this is a person above 60 years old"},
+
+
+  },
+
+    gender: {
+    nc: 2,
+    text_en: {
+    "female": "this is a female",
+    "male": "this is a male"},
+            },
+  }

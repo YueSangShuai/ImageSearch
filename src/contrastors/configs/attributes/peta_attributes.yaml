@@ -1,0 +1,494 @@
+accessoryHeadphone: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing headphones",
+        no: "the person is not wearing headphones"
+    }
+},
+personalLess15: {
+    nc: 2,
+    text_en: {
+        yes: "the person appears to be younger than 15",
+        no: "the person does not appear to be younger than 15"
+    }
+},
+personalLess30: {
+    nc: 2,
+    text_en: {
+        yes: "the person appears to be younger than 30",
+        no: "the person does not appear to be younger than 30"
+    }
+},
+personalLess45: {
+    nc: 2,
+    text_en: {
+        yes: "the person appears to be younger than 45",
+        no: "the person does not appear to be younger than 45"
+    }
+},
+personalLess60: {
+    nc: 2,
+    text_en: {
+        yes: "the person appears to be younger than 60",
+        no: "the person does not appear to be younger than 60"
+    }
+},
+personalLarger60: {
+    nc: 2,
+    text_en: {
+        yes: "the person appears to be older than 60",
+        no: "the person does not appear to be older than 60"
+    }
+},
+carryingBabyBuggy: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying a baby buggy",
+        no: "the person is not carrying a baby buggy"
+    }
+},
+carryingBackpack: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying a backpack",
+        no: "the person is not carrying a backpack"
+    }
+},
+hairBald: {
+    nc: 2,
+    text_en: {
+        yes: "the person is bald",
+        no: "the person is not bald"
+    }
+},
+footwearBoots: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing boots",
+        no: "the person is not wearing boots"
+    }
+},
+lowerBodyCapri: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing capri pants",
+        no: "the person is not wearing capri pants"
+    }
+},
+carryingOther: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying something else",
+        no: "the person is not carrying anything else"
+    }
+},
+carryingShoppingTro: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying a shopping trolley",
+        no: "the person is not carrying a shopping trolley"
+    }
+},
+carryingUmbrella: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying an umbrella",
+        no: "the person is not carrying an umbrella"
+    }
+},
+lowerBodyCasual: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing casual lower-body clothing",
+        no: "the person is not wearing casual lower-body clothing"
+    }
+},
+upperBodyCasual: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing casual upper-body clothing",
+        no: "the person is not wearing casual upper-body clothing"
+    }
+},
+personalFemale: {
+    nc: 2,
+    text_en: {
+        yes: "the person is female",
+        no: "the person is not female"
+    }
+},
+carryingFolder: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying a folder",
+        no: "the person is not carrying a folder"
+    }
+},
+lowerBodyFormal: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing formal lower-body clothing",
+        no: "the person is not wearing formal lower-body clothing"
+    }
+},
+upperBodyFormal: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing formal upper-body clothing",
+        no: "the person is not wearing formal upper-body clothing"
+    }
+},
+accessoryHairBand: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a hair band",
+        no: "the person is not wearing a hair band"
+    }
+},
+accessoryHat: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a hat",
+        no: "the person is not wearing a hat"
+    }
+},
+lowerBodyHotPants: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing hot pants",
+        no: "the person is not wearing hot pants"
+    }
+},
+upperBodyJacket: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a jacket",
+        no: "the person is not wearing a jacket"
+    }
+},
+lowerBodyJeans: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing jeans",
+        no: "the person is not wearing jeans"
+    }
+},
+accessoryKerchief: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a kerchief",
+        no: "the person is not wearing a kerchief"
+    }
+},
+footwearLeatherShoes: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing leather shoes",
+        no: "the person is not wearing leather shoes"
+    }
+},
+upperBodyLogo: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing upper-body clothing with a logo",
+        no: "the person is not wearing upper-body clothing with a logo"
+    }
+},
+hairLong: {
+    nc: 2,
+    text_en: {
+        yes: "the person has long hair",
+        no: "the person does not have long hair"
+    }
+},
+lowerBodyLongSkirt: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a long skirt",
+        no: "the person is not wearing a long skirt"
+    }
+},
+upperBodyLongSleeve: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing long sleeves",
+        no: "the person is not wearing long sleeves"
+    }
+},
+lowerBodyPlaid: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing plaid lower-body clothing",
+        no: "the person is not wearing plaid lower-body clothing"
+    }
+},
+lowerBodyThinStripes: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing thin-striped lower-body clothing",
+        no: "the person is not wearing thin-striped lower-body clothing"
+    }
+},
+carryingLuggageCase: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying a luggage case",
+        no: "the person is not carrying a luggage case"
+    }
+},
+personalMale: {
+    nc: 2,
+    text_en: {
+        yes: "the person is male",
+        no: "the person is not male"
+    }
+},
+carryingMessengerBag: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying a messenger bag",
+        no: "the person is not carrying a messenger bag"
+    }
+},
+accessoryMuffler: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a muffler",
+        no: "the person is not wearing a muffler"
+    }
+},
+accessoryNothing: {
+    nc: 2,
+    text_en: {
+        yes: "the person is not wearing any accessories",
+        no: "the person is wearing some accessories"
+    }
+},
+carryingNothing: {
+    nc: 2,
+    text_en: {
+        yes: "the person is not carrying anything",
+        no: "the person is carrying something"
+    }
+},
+upperBodyNoSleeve: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing no-sleeve upper-body clothing",
+        no: "the person is not wearing no-sleeve upper-body clothing"
+    }
+},
+upperBodyPlaid: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing plaid upper-body clothing",
+        no: "the person is not wearing plaid upper-body clothing"
+    }
+},
+carryingPlasticBags: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying plastic bags",
+        no: "the person is not carrying plastic bags"
+    }
+},
+footwearSandals: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing sandals",
+        no: "the person is not wearing sandals"
+    }
+},
+footwearShoes: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing shoes",
+        no: "the person is not wearing shoes"
+    }
+},
+hairShort: {
+    nc: 2,
+    text_en: {
+        yes: "the person has short hair",
+        no: "the person does not have short hair"
+    }
+},
+lowerBodyShorts: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing shorts",
+        no: "the person is not wearing shorts"
+    }
+},
+upperBodyShortSleeve: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing short sleeves",
+        no: "the person is not wearing short sleeves"
+    }
+},
+lowerBodyShortSkirt: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a short skirt",
+        no: "the person is not wearing a short skirt"
+    }
+},
+footwearSneaker: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing sneakers",
+        no: "the person is not wearing sneakers"
+    }
+},
+footwearStocking: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing stockings",
+        no: "the person is not wearing stockings"
+    }
+},
+upperBodyThinStripes: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing thin-striped upper-body clothing",
+        no: "the person is not wearing thin-striped upper-body clothing"
+    }
+},
+upperBodySuit: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a suit",
+        no: "the person is not wearing a suit"
+    }
+},
+carryingSuitcase: {
+    nc: 2,
+    text_en: {
+        yes: "the person is carrying a suitcase",
+        no: "the person is not carrying a suitcase"
+    }
+},
+lowerBodySuits: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing lower-body suit clothing",
+        no: "the person is not wearing lower-body suit clothing"
+    }
+},
+accessorySunglasses: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing sunglasses",
+        no: "the person is not wearing sunglasses"
+    }
+},
+upperBodySweater: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a sweater",
+        no: "the person is not wearing a sweater"
+    }
+},
+upperBodyThickStripes: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing thick-striped upper-body clothing",
+        no: "the person is not wearing thick-striped upper-body clothing"
+    }
+},
+lowerBodyTrousers: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing trousers",
+        no: "the person is not wearing trousers"
+    }
+},
+upperBodyTshirt: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a T-shirt",
+        no: "the person is not wearing a T-shirt"
+    }
+},
+upperBodyOther: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing other upper-body clothing",
+        no: "the person is not wearing other upper-body clothing"
+    }
+},
+upperBodyVNeck: {
+    nc: 2,
+    text_en: {
+        yes: "the person is wearing a V-neck top",
+        no: "the person is not wearing a V-neck top"
+    }
+}
+
+
+
+# footwear: {
+#     nc: 11,
+#     text_en: {
+#         Black: "the footwear is black",
+#         Blue: "the footwear is blue",
+#         Brown: "the footwear is brown",
+#         Green: "the footwear is green",
+#         Grey: "the footwear is grey",
+#         Orange: "the footwear is orange",
+#         Pink: "the footwear is pink",
+#         Purple: "the footwear is purple",
+#         Red: "the footwear is red",
+#         White: "the footwear is white",
+#         Yellow: "the footwear is yellow"
+#     }
+# },
+# hair: {
+#     nc: 11,
+#     text_en: {
+#         Black: "the hair is black",
+#         Blue: "the hair is blue",
+#         Brown: "the hair is brown",
+#         Green: "the hair is green",
+#         Grey: "the hair is grey",
+#         Orange: "the hair is orange",
+#         Pink: "the hair is pink",
+#         Purple: "the hair is purple",
+#         Red: "the hair is red",
+#         White: "the hair is white",
+#         Yellow: "the hair is yellow"
+#     }
+# },
+# lowerbody: {
+#     nc: 11,
+#     text_en: {
+#         Black: "the lower-body clothing is black",
+#         Blue: "the lower-body clothing is blue",
+#         Brown: "the lower-body clothing is brown",
+#         Green: "the lower-body clothing is green",
+#         Grey: "the lower-body clothing is grey",
+#         Orange: "the lower-body clothing is orange",
+#         Pink: "the lower-body clothing is pink",
+#         Purple: "the lower-body clothing is purple",
+#         Red: "the lower-body clothing is red",
+#         White: "the lower-body clothing is white",
+#         Yellow: "the lower-body clothing is yellow"
+#     }
+# },
+# upperbody: {
+#     nc: 11,
+#     text_en: {
+#         Black: "the upper-body clothing is black",
+#         Blue: "the upper-body clothing is blue",
+#         Brown: "the upper-body clothing is brown",
+#         Green: "the upper-body clothing is green",
+#         Grey: "the upper-body clothing is grey",
+#         Orange: "the upper-body clothing is orange",
+#         Pink: "the upper-body clothing is pink",
+#         Purple: "the upper-body clothing is purple",
+#         Red: "the upper-body clothing is red",
+#         White: "the upper-body clothing is white",
+#         Yellow: "the upper-body clothing is yellow"
+#     }
+# }

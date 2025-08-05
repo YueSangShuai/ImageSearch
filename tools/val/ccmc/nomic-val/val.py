@@ -1,0 +1,210 @@
+import torchvision.transforms as transforms
+import os
+import shutil
+import argparse
+import warnings
+import json
+import torch
+import numpy as np
+from tqdm import tqdm
+
+def test_map(query_feature,query_label,gallery_feature, gallery_label):
+    query_feature = query_feature / (query_feature.norm(dim=1, keepdim=True) + 1e-12)
+    gallery_feature = gallery_feature / (gallery_feature.norm(dim=1, keepdim=True) + 1e-12)
+    CMC = torch.IntTensor(len(gallery_label)).zero_()
+    ap = 0.0
+    for i in range(len(query_label)):
+        ap_tmp, CMC_tmp = evaluate(query_feature[i], query_label[i],  gallery_feature, gallery_label)
+
+        if CMC_tmp[0] == -1:
+            continue
+        CMC = CMC + CMC_tmp
+        ap += ap_tmp
+    CMC = CMC.float()
+    CMC = CMC / len(query_label)
+    print('Rank@1:%f Rank@5:%f Rank@10:%f mAP:%f' % (CMC[0], CMC[4], CMC[9], ap / len(query_label)))
+    return CMC[0], CMC[4], CMC[9], ap / len(query_label)
+
+def evaluate(qf, ql, gf, gl):
+    # 方法1：将 gf 转为 float32
+    query = qf.view(-1, 1).cpu()  # query 保持 float32
+    score = torch.mm(gf.cpu().to(dtype=torch.float32), query)
+    score = score.squeeze(1).cpu()
+    
+    # 关键修改：将 BFloat16 转为 float32（Numpy 支持的类型）
+    score = score.to(dtype=torch.float32)  # 转为 float32
+    score = score.numpy()  # 此时可正常转为 Numpy 数组
+    
+    index = np.argsort(score)
+    index = index[::-1]
+    
+    # 优化：直接用 .cpu() 而非 .cuda().data.cpu()（若原本在 GPU 上）
+    gl = gl.cpu().numpy() if gl.device.type == 'cuda' else gl.numpy()
+    ql = ql.cpu().numpy() if ql.device.type == 'cuda' else ql.numpy()
+    
+    query_index = np.argwhere(gl == ql)
+    CMC_tmp = compute_mAP(index, query_index)
+    return CMC_tmp
+
+def compute_mAP(index, good_index):
+    ap = 0
+    cmc = torch.IntTensor(len(index)).zero_()
+    if good_index.size == 0:  # if empty
+        cmc[0] = -1
+        return ap, cmc
+    # find good_index index
+    ngood = len(good_index)
+    mask = np.in1d(index, good_index)
+    rows_good = np.argwhere(mask == True)
+    rows_good = rows_good.flatten()
+
+    cmc[rows_good[0]:] = 1
+    for i in range(ngood):
+        d_recall = 1.0 / ngood
+        precision = (i + 1) * 1.0 / (rows_good[i] + 1)
+        if rows_good[i] != 0:
+            old_precision = i * 1.0 / rows_good[i]
+        else:
+            old_precision = 1.0
+        ap = ap + d_recall * (old_precision + precision) / 2
+
+    return ap, cmc
+
+
+from model_inference import Emove_inference
+
+def test_mini(args): 
+    #feature_extractor = ImageTextEmbedder(**vars(args))
+    
+    feature_extractor = ImageFeatureExtractor(**vars(args))
+    feature_extractor_text = TextFeatureExtractor(**vars(args))
+    
+    # Set batch size for processing
+    batch_size = 32
+    
+    with open(args.caption_path, 'r', encoding='utf8') as fp:
+        dataset = json.load(fp)
+        if args.sample_limit > 0:
+            dataset = dataset[:args.sample_limit]
+            print(f"Using {len(dataset)} samples from dataset")
+    
+    qids, gids, qfeats, gfeats = [], [], [], []
+    
+    for item in dataset:
+        label = item["id"]
+        label = torch.tensor(label)
+        file_path = os.path.join(args.image_dir,item["file_path"])
+        img_feat = torch.tensor(feature_extractor.image_embedding(file_path)).unsqueeze(0)
+        gfeats.append(img_feat)
+        gids.append(label.view(-1)) 
+
+    gids = torch.cat(gids, 0)
+    gfeats = torch.cat(gfeats, 0)
+    
+    # text
+    initial_data = []
+    for i in range(len(dataset)):
+        item = dataset[i]
+        label = item["id"]
+        captions_list = item["captions"]
+        for j in range(len(captions_list)):
+            caption = captions_list[j]
+            initial_data.append([label,caption])
+    for index in range(len(initial_data)):
+        caption = initial_data[index][1]
+        label = initial_data[index][0]
+        label = torch.tensor(label)
+        text_feat = torch.tensor(feature_extractor_text.text_embedding(caption)).unsqueeze(0)
+        print(text_feat)
+        qids.append(label.view(-1))  # flatten
+        qfeats.append(text_feat)
+        
+    qids = torch.cat(qids, 0)
+    qfeats = torch.cat(qfeats, 0)
+    print(qfeats.shape)
+        
+    ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP = test_map(qfeats, qids, gfeats, gids)
+    return ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP
+
+def test(args): 
+    feature_extractor = Emove_inference(args)
+    
+    with open(args.caption_path, 'r', encoding='utf8') as fp:
+        dataset = json.load(fp)
+        if args.sample_limit > 0:
+            dataset = dataset[:args.sample_limit]
+            print(f"Using {len(dataset)} samples from dataset")
+    
+    qids, gids, qfeats, gfeats = [], [], [], []
+    
+    for item in tqdm(dataset):
+        label = item["id"]
+        label = torch.tensor(label)
+        file_path = os.path.join(args.image_dir,item["file_path"])
+        img_feat = torch.tensor(feature_extractor.inference_image(file_path))
+        gfeats.append(img_feat)
+        gids.append(label.view(-1)) 
+
+    gids = torch.cat(gids, 0)
+    gfeats = torch.cat(gfeats, 0)
+    
+    # text
+    initial_data = []
+    for i in range(len(dataset)):
+        item = dataset[i]
+        label = item["id"]
+        captions_list = item["captions"]
+        for j in range(len(captions_list)):
+            caption = captions_list[j]
+            initial_data.append([label,caption])
+    for index in tqdm(range(len(initial_data))):
+        caption = initial_data[index][1]
+        label = initial_data[index][0]
+        label = torch.tensor(label)
+        text_feat = torch.tensor(feature_extractor.inference_text(caption))
+        qids.append(label.view(-1))  # flatten
+        qfeats.append(text_feat)
+        
+    qids = torch.cat(qids, 0)
+    qfeats = torch.cat(qfeats, 0)
+    print(qfeats.shape)
+        
+    ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP = test_map(qfeats, qids, gfeats, gids)
+    return ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP
+
+
+def Test_main(args):
+    
+    
+    ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP = test(args)
+
+    print('{:.5f}  {:.5f}  {:.5f}  {:.5f}'.format(
+            ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP))
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="CUHK-PEDES eval ")
+    parser.add_argument('--image_dir', type=str, default='/data/lina/datasets/CUHK-PEDES/imgs')
+    parser.add_argument('--caption_path', type=str,
+                        default='/data/lina/datasets/CUHK-PEDES/caption_all.json',
+                        help='path for test annotation json file')
+    parser.add_argument('--model_type', type=str, choices=['mini', 'large'], default='large',
+                        help='Choose model type: mini (uses ImageFeatureExtractor/TextFeatureExtractor) or full (uses ImageTextEmbedder)')
+    parser.add_argument('--sample_limit', type=int, default=1000,
+                        help='Number of samples to process (0 for all)')
+    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/VectorIE/models/nomic/")
+    parser.add_argument("--yaml_path", type=str, default="/data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_vits.yaml")
+    parser.add_argument("--onnx_path", type=str, default="/data/yuesang/LLM/contrastors/emov2_hf/emov2.onnx")
+    parser.add_argument('--device', type=str, default='cuda:0')
+    
+    
+    args = parser.parse_args()
+    
+    if args.model_type == 'mini':
+        print(f"Running mini model with {args.sample_limit} samples")
+        ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP = test_mini(args)
+    else:
+        print(f"Running large model with {args.sample_limit} samples")
+        ac_top1_t2i, ac_top5_t2i, ac_top10_t2i, mAP = test(args)
+    
