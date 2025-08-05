@@ -37,7 +37,6 @@ class ImageTextTrainer(TextTextTrainer):
         self.classifer_config=config.classiffer_config
         super(ImageTextTrainer, self).__init__(config, dtype)
         
-
     def get_transforms(self, transforms):
         train_transforms = image_transform(**transforms.dict(), is_train=True)
         val_transforms = image_transform(
@@ -65,7 +64,6 @@ class ImageTextTrainer(TextTextTrainer):
     def get_model(self, config):
         model_config = DualEncoderConfig(config)
         model = DualEncoder(model_config)
-
         has_trainable_params = sum(p.requires_grad for p in model.parameters()) > 0
         model = model.to(f"cuda:{self.process_index}")
 
@@ -196,8 +194,7 @@ class ImageTextTrainer(TextTextTrainer):
             ):
                 unwrapped_scale = self.unwrap(logit_scale)
                 torch.save(unwrapped_scale.state_dict(), f"{output_dir}/logit_scale.pt")
-                
-            
+                      
     def forward_step(self, model, inputs, **kwargs):
         model.train()
         if self.use_grad_cache:
@@ -221,9 +218,9 @@ class ImageTextTrainer(TextTextTrainer):
         vision_inputs = {k: v.to(model.device) for k, v in batch["vision"].items()}
         if batch.get("teacher_vision") is not None:
             teacher_vision_inputs={k: v.squeeze(1).to(dtype=model.dtype).to(model.device) for k, v in batch["teacher_vision"].items()}
-            outputs = model(text_inputs, vision_inputs,batch["label"],teacher_vision_inputs)
+            outputs = model(text_inputs=text_inputs, vision_inputs=vision_inputs,targets=batch["label"],img_path=teacher_vision_inputs,tolenizer=self.tolenizer)
         else:
-            outputs = model(text_inputs, vision_inputs,batch["label"])
+            outputs = model(text_inputs=text_inputs, vision_inputs=vision_inputs,targets=batch["label"],tolenizer=self.tolenizer)
         
         return outputs
 
@@ -322,6 +319,7 @@ class ImageTextTrainer(TextTextTrainer):
         all_image_embs = []
         all_text_embs = []
         all_labels = {label_name: [] for label_name in self.classifer_config.classes}
+        all_valid_masks = {label_name: [] for label_name in self.classifer_config.classes}  # 新增：记录有效掩码
 
         device = model.device
         text, vision = model.text, model.vision
@@ -342,12 +340,17 @@ class ImageTextTrainer(TextTextTrainer):
                 all_image_embs.append(image_emb)
                 all_text_embs.append(text_emb)
 
-                # 动态提取所有标签字段
+                # 动态提取所有标签字段，并记录有效掩码
                 for label_name in self.classifer_config.classes:
                     label_value = labels.get(label_name)
                     if label_value is not None:
                         label_tensor = label_value if isinstance(label_value, torch.Tensor) else torch.tensor(label_value)
-                        all_labels[label_name].append(label_tensor.to(device))
+                        label_tensor = label_tensor.to(device)
+                        all_labels[label_name].append(label_tensor)
+                        
+                        # 新增：创建并记录有效掩码 (-1 表示无效)
+                        valid_mask = (label_tensor != -1)
+                        all_valid_masks[label_name].append(valid_mask)
 
         # concat embeddings
         all_image_embs = torch.cat(all_image_embs, dim=0)
@@ -357,10 +360,13 @@ class ImageTextTrainer(TextTextTrainer):
         all_image_embs = gather(all_image_embs).to(device)
         all_text_embs = gather(all_text_embs).to(device)
 
-        # concat & gather labels
+        # concat & gather labels 和 masks
         for label_name in all_labels:
             all_labels[label_name] = torch.cat(all_labels[label_name], dim=0)
             all_labels[label_name] = gather(all_labels[label_name]).to(device)
+            
+            all_valid_masks[label_name] = torch.cat(all_valid_masks[label_name], dim=0)
+            all_valid_masks[label_name] = gather(all_valid_masks[label_name]).to(device)
 
         return all_image_embs, all_text_embs, all_labels, all_valid_masks  # 返回掩码
  
@@ -410,7 +416,6 @@ class ImageTextTrainer(TextTextTrainer):
             text_embs = self.get_class_embdings(text_en_dict, tokenizer, text_model, device)
             logits = logit_scale * (valid_image_embs.float() @ text_embs.T.float())
             preds = logits.argmax(dim=-1).cpu()
-            targets = all_labels[class_name].cpu()
 
             # 计算准确率（此时无-1标签干扰）
             acc = (preds == valid_targets).float().mean().item()
@@ -582,7 +587,6 @@ class ImageTextTrainer(TextTextTrainer):
                 }, step=step)
                 
         if is_main_process():
-            # 控制台打印
             print(f"[Eval] Step {step} | zero_shot/image_text_similarity: {sim_mean:.4f}")
             
             # 打印Zero-shot平均精度

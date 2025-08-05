@@ -5,11 +5,7 @@ train_args:
   warmup_steps: 200 
   cooldown_steps: null
   checkpoint: null
-<<<<<<< HEAD:src/contrastors/configs/train/pa-100k/nomic_pa-100k.yaml
   wandb: false
-=======
-  wandb: True
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):src/contrastors/configs/train/nomic_pa-100k.yaml
   wandb_project_name: "nomic"
   wandb_entity: "yuesang"
   wandb_run_name: "PA-100k-emov2-2m"
@@ -21,7 +17,7 @@ train_args:
   eval_strategy: "epochs"
   chunk_size: 1536
   # output_dir: "ckpts/facebook/dino-vits8"
-  output_dir: "ckpts/person/pa-100k/emov2-2m_teacher"
+  output_dir: "ckpts/test/pa-100k/emov2-2m_teacher"
   # if using deepspeed, this will be ignored
   schedule_type: "cosine"
   max_grad_norm: 1.0
@@ -42,16 +38,11 @@ data_args:
   # (TODO): zanussbaum up workers and check deterministic
   workers: 8 
   # this is per gpu batch size
-<<<<<<< HEAD:src/contrastors/configs/train/pa-100k/nomic_pa-100k.yaml
-  batch_size: 256
-  eval_batch_size: 256
-=======
-  batch_size: 2048
-  eval_batch_size: 2048
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):src/contrastors/configs/train/nomic_pa-100k.yaml
+  batch_size: 30
+  eval_batch_size: 30
   seed: 42
   shuffle: false
-  imagenet_val_path: "/data/yuesang/LLM/contrastors/data/test/test.json"
+  imagenet_val_path: "/data/yuesang/LLM/contrastors/data/pa100k_label/val.json"
   dataset_resampled: false
   is_local: true
 
@@ -84,11 +75,8 @@ vision_model_args:
   trainable_logit_scale: true
   gradient_checkpointing: false
   projection_dim: 768
-<<<<<<< HEAD:src/contrastors/configs/train/pa-100k/nomic_pa-100k.yaml
   distill_type: ""
 
-=======
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):src/contrastors/configs/train/nomic_pa-100k.yaml
 
 transforms:
   image_size: 224

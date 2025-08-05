@@ -8,9 +8,10 @@ cd /data/yuesang/LLM/contrastors/src
 deepspeed --include="localhost:0,2,3"\
   --module contrastors.train \
   --deepspeed_config=contrastors/configs/deepspeed/image_text.json \
-  --config=contrastors/configs/train/Mals/nomic_distill.yaml \
+  --config=contrastors/configs/train/pa-100k/nomic_pa-100k.yaml \
   --dtype=bf16 \
 
+# /data/yuesang/LLM/contrastors/src/contrastors/configs/train/pa-100k/nomic_pa-100k.yaml
 # /data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_vits.yaml
 # nomic_pa-100k_vits.yaml
 # python /data/yuesang/LLM/contrastors/convert_to_hf.py --ckpt_path /data/yuesang/LLM/contrastors/src/ckpts/person/pa-100k/vits/epoch_39/model --save_dir nomic-vision-embv1.5 --vision_teacher

@@ -49,7 +49,6 @@ class BiEncoder_teacher_slip2(PreTrainedModel):
 
 
 
-
 class DualEncoder(PreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
@@ -80,13 +79,13 @@ class DualEncoder(PreTrainedModel):
                 self.teacher_vision.eval()
 
             
-
+        self.classifier_config=config.image_model_args.classifier_config
         self.logit_scale = LogitScale(config.image_model_args)
         
         self.attribute_classifiers = nn.ModuleDict()
         self.attribute_classes = {
             attr_name: attr_cfg["nc"]
-            for attr_name, attr_cfg in config.image_model_args.classifier_config["classes"].items()
+            for attr_name, attr_cfg in self.classifier_config["classes"].items()
         }
         hidden_dim = config.image_model_args.projection_dim
         
@@ -113,24 +112,78 @@ class DualEncoder(PreTrainedModel):
     def multi_attribute_focal_loss(outputs, targets, attribute_classes, alpha=0.25, gamma=2.0):
         loss = 0.0
         loss_dict = {}
+        
         for attr, num_classes in attribute_classes.items():
             logits = outputs[f"{attr}_logits"]     # (B, C)
             if isinstance(targets[attr], list):
                 target = torch.tensor(targets[attr], dtype=torch.long, device=logits.device)
             else:
                 target = targets[attr].to(logits.device)
-                
+            
+            
+            
             l = focal_loss(logits, target, alpha=alpha, gamma=gamma)
-            loss_dict[f"{attr}_loss"] = l.detach()  # 保留 tensor
+            loss_dict[f"attr_{attr}_loss"] = l.detach()  # 保留 tensor
             loss += l
         loss_dict["classifier_loss"] = loss.detach()
         
         return loss, loss_dict
             
     
-    # def multi_clip_loss():
+    def multi_clip_loss(self, tokenizer, image_embeddings, targets, alpha=0.25, gamma=2.0):
+        loss = 0.0
+        loss_dict = {}
+        logit_scale = self.logit_scale.to(image_embeddings.device)
+        
+        for attr, attr_info in self.classifier_config["classes"].items():
+            # 1. 跳过目标中不存在的属性
+            if attr not in targets:
+                continue
+            
+            text_en = attr_info["text_en"]
+            # 2. 处理目标标签，确保设备正确
+            if isinstance(targets[attr], list):
+                target = torch.tensor(targets[attr], dtype=torch.long, device=image_embeddings.device)
+            else:
+                target = targets[attr].to(image_embeddings.device)
+            
+            # 3. 过滤标签为 -1 的样本（核心步骤）
+            valid_mask = (target != -1)  # 生成有效掩码（True表示有效）
+            if valid_mask.sum() == 0:    # 无有效样本时跳过该属性
+                continue
+            
+            # 4. 应用掩码，仅保留有效样本
+            valid_image_embeds = image_embeddings[valid_mask]  # 有效图像嵌入
+            valid_target = target[valid_mask]                  # 有效标签
+            
+            # 5. 生成文本嵌入并归一化
+            text_inputs = tokenizer(
+                text_en, 
+                return_tensors="pt", 
+                padding=True, 
+                truncation=True
+            ).to(image_embeddings.device)
+            text_embeddings = self.text(**text_inputs)["embedding"]  # 文本嵌入
+            text_embeddings = F.normalize(text_embeddings, dim=-1)   # 归一化
+            
+            # 6. 计算logits（仅用有效样本）
+            logits = logit_scale * (valid_image_embeds.float() @ text_embeddings.T.float())
+            
+            print(logits.shape)
+            # 7. 计算当前属性的损失（仅基于有效样本）
+            l = focal_loss(logits, valid_target, alpha=alpha, gamma=gamma)
+            
+            # 8. 记录损失
+            loss_dict[f"clip_{attr}_loss"] = l.detach()
+            loss += l
+        
+        # 9. 记录总损失（若所有属性都无有效样本，loss为0）
+        loss_dict["clip_classifier_loss"] = loss.detach()
+        return loss, loss_dict
+            
+            
     
-    def forward(self, text_inputs, vision_inputs,targets,img_path=None):
+    def forward(self, text_inputs, vision_inputs,targets,img_path=None,tokenizer=None):
         if self.precomputed_text:
             assert "text_embs" in text_inputs, "Precomputed text inputs must have text_embs"
             text_outputs = {"embedding": text_inputs["text_embs"]}
@@ -174,35 +227,45 @@ class DualEncoder(PreTrainedModel):
         if self.distill:
             metrics.update({"teacher_student_loss":teacher_student_loss})
 
+        
+        #clip分类损失
+        if self.attribute_classes:
+            clip_loss, clip_loss_dict=self.multi_clip_loss(tokenizer, all_vis_emb, targets)
+            total_loss += clip_loss
+            metrics.update(clip_loss_dict)
+            
+        
         #分类损失
         if self.attribute_classes:
             attr_outputs = {}
             valid_attrs = {}
+            valid_targets_dict = {}  # 存储筛选后的目标
             
             for attr, classifier in self.attribute_classifiers.items():
                 if attr not in targets:
-                    continue  # 如果目标中没有该属性标签，跳过
-                # 计算分类器输出
-                logits = classifier(vision_emb)  # (B, C)
-                # 过滤掉标签为 -1 的样本
+                    continue
+                logits = classifier(all_vis_emb)
                 valid_mask = (targets[attr] != -1)
                 if valid_mask.sum() == 0:
-                    continue  # 如果没有有效样本，跳过该属性
+                    continue
                 # 应用掩码
                 valid_logits = logits[valid_mask]
                 valid_targets = targets[attr][valid_mask]
+                # 存储结果
                 attr_outputs[f"{attr}_logits"] = valid_logits
-                valid_attrs[attr] = self.attribute_classes[attr]  # 只传递有效属性
-            if valid_attrs:  # 如果存在至少一个有效的属性标签才计算损失
-                attr_loss, loss_dict = self.multi_attribute_focal_loss(
+                valid_attrs[attr] = self.attribute_classes[attr]  # 若未使用，可简化为 valid_attrs.add(attr)
+                valid_targets_dict[attr] = valid_targets  # 复用筛选结果
+            
+            if valid_attrs:
+                attr_loss, attr_loss_dict = self.multi_attribute_focal_loss(
                     attr_outputs,
-                    {attr: targets[attr][targets[attr] != -1] for attr in valid_attrs},
+                    valid_targets_dict,  # 直接传递复用的目标
                     valid_attrs,
                     alpha=0.25,
                     gamma=2.0
                 )
-                total_loss = total_loss + attr_loss
-                metrics.update(loss_dict)
+                total_loss += attr_loss
+                metrics.update(attr_loss_dict)
 
         metrics["loss"] = total_loss
 
