@@ -5,13 +5,13 @@ export HTTPS_PROXY="http://10.8.18.178:7890"
 cd /data/yuesang/LLM/contrastors/src
 
 
-deepspeed --include="localhost:0,2,3"\
+deepspeed --include="localhost:0"\
   --module contrastors.train \
   --deepspeed_config=contrastors/configs/deepspeed/image_text.json \
-  --config=contrastors/configs/train/Mals/nomic_distill.yaml \
+  --config=contrastors/configs/train/test/nomic_pa-100k.yaml \
   --dtype=bf16 \
 
-# /data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_distill.yaml
+# /data/yuesang/LLM/contrastors/src/contrastors/configs/train/test/nomic_pa-100k.yaml
 # /data/yuesang/LLM/contrastors/src/contrastors/configs/train/pa-100k/nomic_pa-100k.yaml
 # /data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_vits.yaml
 # nomic_pa-100k_vits.yaml

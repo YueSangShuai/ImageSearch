@@ -52,9 +52,6 @@ def load_mexma_model():
             outputs = model.encode_texts(**inputs, normalize=True)  # 移除return_dict参数
             if outputs.dtype == torch.bfloat16:
                 outputs = outputs.to(dtype=torch.float32)
-            # 兼容元组和字典输出
-            # last_hidden_state = outputs[0] if isinstance(outputs, tuple) else outputs.last_hidden_state
-            # cls_emb = last_hidden_state[:, 0, :]
             return torch.nn.functional.normalize(outputs, dim=-1).cpu().numpy()
     
     # 关键修复：返回tokenizer和嵌入函数的元组

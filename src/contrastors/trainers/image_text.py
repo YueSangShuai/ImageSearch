@@ -23,7 +23,8 @@ from contextlib import nullcontext
 import os
 import csv
 from transformers import PreTrainedModel,AutoModel, AutoImageProcessor
-
+from tqdm import tqdm
+import json
 
 def is_main_process():
     return not dist.is_initialized() or dist.get_rank() == 0
@@ -315,60 +316,170 @@ class ImageTextTrainer(TextTextTrainer):
             text_embs = F.normalize(text_embs, dim=-1)
         return (image_embs * text_embs).sum(dim=-1)  # [N]
     
-    def _extract_embeddings(self, model, dataloader):
+    def _extract_embeddings(self, model, dataloader, save_dir="./extracted_data"):
+        """
+        提取并保存vision_inputs、text_inputs、图像嵌入和文本嵌入
+        
+        Args:
+            model: 训练好的模型
+            dataloader: 数据加载器
+            save_dir: 保存目录（会自动创建）
+        """
+        # 初始化存储列表
         all_image_embs = []
         all_text_embs = []
         all_labels = {label_name: [] for label_name in self.classifer_config.classes}
-        all_valid_masks = {label_name: [] for label_name in self.classifer_config.classes}  # 新增：记录有效掩码
+        all_valid_masks = {label_name: [] for label_name in self.classifer_config.classes}
+        
+        # 新增：存储输入数据（vision_inputs和text_inputs）
+        all_vision_inputs = []  # 存储每个样本的vision输入
+        all_text_inputs = []    # 存储每个样本的text输入
+        sample_ids = []         # 生成唯一样本ID，用于对齐
 
         device = model.device
         text, vision = model.text, model.vision
         text.eval()
         vision.eval()
 
+        # 创建保存目录
+        os.makedirs(save_dir, exist_ok=True)
+        os.makedirs(os.path.join(save_dir, "vision_inputs"), exist_ok=True)
+        os.makedirs(os.path.join(save_dir, "text_inputs"), exist_ok=True)
+
         with torch.no_grad():
-            for batch in dataloader:
+            for batch_idx, batch in enumerate(tqdm(dataloader)):
+                # 提取单批次数据
                 vision_inputs = {k: v.to(device) for k, v in batch["vision"].items()}
                 text_inputs = {k: v.to(device) for k, v in batch["text"].items()}
                 labels = batch["label"]
+                batch_size = next(iter(vision_inputs.values())).shape[0]  # 批次大小
 
-                autocast_ctx = torch.autocast(device_type="cuda", dtype=self.dtype) if device.type == "cuda" else nullcontext()
+                # 生成该批次样本的唯一ID（格式：批次索引_样本索引）
+                current_sample_ids = [f"batch_{batch_idx}_sample_{i}" for i in range(batch_size)]
+                sample_ids.extend(current_sample_ids)
+
+                # 保存单批次的vision_inputs和text_inputs（按样本拆分）
+                for i in range(batch_size):
+                    # 保存vision_inputs（如pixel_values等）
+                    vision_sample = {k: v[i].cpu() for k, v in vision_inputs.items()}
+                    torch.save(
+                        vision_sample,
+                        os.path.join(save_dir, "vision_inputs", f"{current_sample_ids[i]}.pt")
+                    )
+                    # 保存text_inputs（如input_ids、attention_mask等）
+                    text_sample = {k: v[i].cpu() for k, v in text_inputs.items()}
+                    torch.save(
+                        text_sample,
+                        os.path.join(save_dir, "text_inputs", f"{current_sample_ids[i]}.pt")
+                    )
+
+                # 提取嵌入
+                autocast_ctx = torch.autocast(device_type="cuda", dtype=torch.bfloat16) if device.type == "cuda" else nullcontext()
                 with autocast_ctx:
-                    image_emb = vision(**vision_inputs)["embedding"].to(device)
+                    image_emb = vision(** vision_inputs)["embedding"].to(device)
                     text_emb = text(**text_inputs)["embedding"].to(device)
 
                 all_image_embs.append(image_emb)
                 all_text_embs.append(text_emb)
 
-                # 动态提取所有标签字段，并记录有效掩码
+                # 处理标签和掩码
                 for label_name in self.classifer_config.classes:
                     label_value = labels.get(label_name)
                     if label_value is not None:
                         label_tensor = label_value if isinstance(label_value, torch.Tensor) else torch.tensor(label_value)
                         label_tensor = label_tensor.to(device)
                         all_labels[label_name].append(label_tensor)
-                        
-                        # 新增：创建并记录有效掩码 (-1 表示无效)
-                        valid_mask = (label_tensor != -1)
-                        all_valid_masks[label_name].append(valid_mask)
+                        all_valid_masks[label_name].append(label_tensor != -1)
 
-        # concat embeddings
+        # 合并所有批次的嵌入
         all_image_embs = torch.cat(all_image_embs, dim=0)
         all_text_embs = torch.cat(all_text_embs, dim=0)
 
-        # gather embeddings
-        all_image_embs = gather(all_image_embs).to(device)
-        all_text_embs = gather(all_text_embs).to(device)
-
-        # concat & gather labels 和 masks
+        # 合并标签和掩码
         for label_name in all_labels:
             all_labels[label_name] = torch.cat(all_labels[label_name], dim=0)
-            all_labels[label_name] = gather(all_labels[label_name]).to(device)
-            
             all_valid_masks[label_name] = torch.cat(all_valid_masks[label_name], dim=0)
-            all_valid_masks[label_name] = gather(all_valid_masks[label_name]).to(device)
 
-        return all_image_embs, all_text_embs, all_labels, all_valid_masks  # 返回掩码
+        # 保存嵌入向量（整体保存，方便批量加载）
+        torch.save(all_image_embs.cpu(), os.path.join(save_dir, "all_image_embeddings.pt"))
+        torch.save(all_text_embs.cpu(), os.path.join(save_dir, "all_text_embeddings.pt"))
+
+        # 保存样本ID与嵌入索引的映射（方便查询）
+        embedding_mapping = {
+            "sample_ids": sample_ids,
+            "num_samples": len(sample_ids),
+            "image_embedding_path": "all_image_embeddings.pt",
+            "text_embedding_path": "all_text_embeddings.pt",
+            "vision_inputs_dir": "vision_inputs/",
+            "text_inputs_dir": "text_inputs/"
+        }
+        with open(os.path.join(save_dir, "embedding_mapping.json"), "w", encoding="utf-8") as f:
+            json.dump(embedding_mapping, f, ensure_ascii=False, indent=2)
+
+        print(f"数据保存完成：\n"
+            f"- 总样本数：{len(sample_ids)}\n"
+            f"- 图像嵌入：{os.path.join(save_dir, 'all_image_embeddings.pt')}\n"
+            f"- 文本嵌入：{os.path.join(save_dir, 'all_text_embeddings.pt')}\n"
+            f"- 视觉输入：{os.path.join(save_dir, 'vision_inputs')}\n"
+            f"- 文本输入：{os.path.join(save_dir, 'text_inputs')}\n"
+            f"- 映射关系：{os.path.join(save_dir, 'embedding_mapping.json')}")
+
+        return all_image_embs, all_text_embs, all_labels, all_valid_masks
+    
+    
+    # def _extract_embeddings(self, model, dataloader):
+    #     all_image_embs = []
+    #     all_text_embs = []
+    #     all_labels = {label_name: [] for label_name in self.classifer_config.classes}
+    #     all_valid_masks = {label_name: [] for label_name in self.classifer_config.classes}  # 新增：记录有效掩码
+
+    #     device = model.device
+    #     text, vision = model.text, model.vision
+    #     text.eval()
+    #     vision.eval()
+
+    #     with torch.no_grad():
+    #         for batch in dataloader:
+    #             vision_inputs = {k: v.to(device) for k, v in batch["vision"].items()}
+    #             text_inputs = {k: v.to(device) for k, v in batch["text"].items()}
+    #             labels = batch["label"]
+    #             autocast_ctx = torch.autocast(device_type="cuda", dtype=self.dtype) if device.type == "cuda" else nullcontext()
+    #             with autocast_ctx:
+    #                 image_emb = vision(**vision_inputs)["embedding"].to(device)
+    #                 text_emb = text(**text_inputs)["embedding"].to(device)
+
+    #             all_image_embs.append(image_emb)
+    #             all_text_embs.append(text_emb)
+
+    #             # 动态提取所有标签字段，并记录有效掩码
+    #             for label_name in self.classifer_config.classes:
+    #                 label_value = labels.get(label_name)
+    #                 if label_value is not None:
+    #                     label_tensor = label_value if isinstance(label_value, torch.Tensor) else torch.tensor(label_value)
+    #                     label_tensor = label_tensor.to(device)
+    #                     all_labels[label_name].append(label_tensor)
+                        
+    #                     # 新增：创建并记录有效掩码 (-1 表示无效)
+    #                     valid_mask = (label_tensor != -1)
+    #                     all_valid_masks[label_name].append(valid_mask)
+
+    #     # concat embeddings
+    #     all_image_embs = torch.cat(all_image_embs, dim=0)
+    #     all_text_embs = torch.cat(all_text_embs, dim=0)
+
+    #     # gather embeddings
+    #     all_image_embs = gather(all_image_embs).to(device)
+    #     all_text_embs = gather(all_text_embs).to(device)
+
+    #     # concat & gather labels 和 masks
+    #     for label_name in all_labels:
+    #         all_labels[label_name] = torch.cat(all_labels[label_name], dim=0)
+    #         all_labels[label_name] = gather(all_labels[label_name]).to(device)
+            
+    #         all_valid_masks[label_name] = torch.cat(all_valid_masks[label_name], dim=0)
+    #         all_valid_masks[label_name] = gather(all_valid_masks[label_name]).to(device)
+
+    #     return all_image_embs, all_text_embs, all_labels, all_valid_masks  # 返回掩码
  
 
     def _compute_zero_shot_accuracy(self, image_embs, model, all_labels: dict, all_valid_masks: dict):

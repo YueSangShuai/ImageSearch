@@ -20,6 +20,10 @@ from .base import BaseTrainer
 from torch import nn
 from typing import List, Dict, Union, Tuple
 
+import torch
+from safetensors.torch import load_file
+
+
 class SentenceTransformerModule(nn.Module):
     """
     Wrapper class to make a custom embedding model compatible with SentenceTransformers.
@@ -237,13 +241,87 @@ class TextTextTrainer(BaseTrainer):
                 epoch=0,
             )
             self.total_num_steps = int(
-                len(train_dataloader.dataset) / gradient_accumulation_steps // data_config.batch_size
+                len(train_datparametersaloader.dataset) / gradient_accumulation_steps // data_config.batch_size
             )
 
         nano_beir = NanoBEIREvaluator(query_prompts=model_args.query_prefix, corpus_prompts=model_args.document_prefix, show_progress_bar=True)
 
         return {"train": train_dataloader, "val": nano_beir, "test": None}
 
+    
+
+
+    def compare_model_with_safetensors(self,current_model, safetensors_path, eps=1e-6):
+        """
+        对比当前模型与safetensors文件中的权重差异
+        
+        Args:
+            current_model: 当前加载的模型实例
+            safetensors_path: .safetensors文件路径
+            eps: 浮点数值对比的容差
+        """
+        # 加载safetensors中的权重
+        try:
+            saved_state_dict = load_file(safetensors_path, device="cpu")
+            print(f"成功加载safetensors文件：{safetensors_path}")
+        except Exception as e:
+            print(f"加载safetensors文件失败：{str(e)}")
+            return
+        
+        # 获取当前模型的权重
+        current_state_dict = current_model
+        
+        # 提取所有参数名称
+        saved_keys = set(saved_state_dict.keys())
+        current_keys = set(current_state_dict.keys())
+        
+        # 查找仅存在于一个文件中的参数
+        only_saved = saved_keys - current_keys
+        only_current = current_keys - saved_keys
+        
+        if only_saved:
+            print(f"\n⚠️ 仅存在于safetensors中的参数 ({len(only_saved)})：")
+            for key in sorted(only_saved):
+                print(f"  - {key}")
+        
+        if only_current:
+            print(f"\n⚠️ 仅存在于当前模型中的参数 ({len(only_current)})：")
+            for key in sorted(only_current):
+                print(f"  - {key}")
+        
+        # 对比共同存在的参数
+        common_keys = saved_keys & current_keys
+        print(f"\n📊 共有 {len(common_keys)} 个共同参数，开始对比数值...")
+        
+        different_keys = []
+        for key in sorted(common_keys):
+            saved_param = saved_state_dict[key]
+            current_param = current_state_dict[key]
+            
+            # 检查形状是否一致
+            if saved_param.shape != current_param.shape:
+                different_keys.append(f"形状不一致 - {key}: {saved_param.shape} vs {current_param.shape}")
+                continue
+            
+            # 检查数据类型是否一致
+            if saved_param.dtype != current_param.dtype:
+                different_keys.append(f"数据类型不一致 - {key}: {saved_param.dtype} vs {current_param.dtype}")
+                continue
+            
+            # 检查数值是否一致（处理浮点精度）
+            if not torch.allclose(saved_param, current_param, atol=eps, rtol=eps):
+                max_diff = torch.abs(saved_param - current_param).max().item()
+                different_keys.append(f"数值不一致 - {key}（最大差异: {max_diff:.6f}）")
+        
+        # 输出对比结果
+        if not different_keys:
+            print("\n✅ 所有共同参数的形状、类型和数值完全一致")
+        else:
+            print(f"\n❌ 发现 {len(different_keys)} 处参数差异：")
+            for diff in different_keys:
+                print(f"  - {diff}")
+                
+    
     def save_model(self, output_dir):
         super().save_model(output_dir)
         if self.global_rank == 0:
