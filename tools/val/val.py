@@ -303,7 +303,6 @@ class EVAL:
         print(f"[Eval] Step {step} | zero_shot/image_text_similarity: {sim_mean:.4f}")
 
         for name, acc in zero_shot_acc_dict.items():
-<<<<<<< HEAD:tools/val/val.py
                 stats = label_stats.get(name, {
                     "加载时有效的标签数": 0,
                     "加载时无效的标签数": 0,
@@ -332,12 +331,6 @@ class EVAL:
         if zero_shot_acc_dict:  # 避免空字典导致的错误
             zero_shot_avg = sum(zero_shot_acc_dict.values()) / len(zero_shot_acc_dict)
             print(f"[Eval] Step {step} | zero_shot/平均_top1: {zero_shot_avg:.4f}")
-=======
-            print(f"[Eval] Step {step} | zero_shot/{name}_top1: {acc:.4f}")
-
-        for attr, acc in attr_acc_dict.items():
-            print(f"[Eval] Step {step} | attr_/{attr}_top1: {acc:.4f}")
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):tools/val.py
 
     
     def val(self):
@@ -346,14 +339,9 @@ class EVAL:
         
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
-<<<<<<< HEAD:tools/val/val.py
-    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/Mals/vits/epoch_10/model")
+    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/pa-100k/emov2-2m_dist/epoch_0/model")
     parser.add_argument("--yaml_path", type=str, default="/data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_vits.yaml")
-=======
-    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/pa-100k/vits/epoch_0_model")
-    parser.add_argument("--yaml_path", type=str, default="/data/yuesang/LLM/contrastors/src/contrastors/configs/train/nomic_pa-100k_vits.yaml")
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):tools/val.py
-    parser.add_argument('--device', type=str, default='cuda:2')
+    parser.add_argument('--device', type=str, default='cuda:1')
     args = parser.parse_args()
     eval=EVAL(args)
     eval.val()

@@ -133,14 +133,14 @@ class DualEncoder(PreTrainedModel):
     def multi_clip_loss(self, tokenizer, image_embeddings, targets, alpha=0.25, gamma=2.0):
         loss = 0.0
         loss_dict = {}
-        logit_scale = self.logit_scale.to(image_embeddings.device)
+        logit_scale_value = self.logit_scale.logit_scale.exp().to(image_embeddings.device)
         
         for attr, attr_info in self.classifier_config["classes"].items():
             # 1. 跳过目标中不存在的属性
             if attr not in targets:
                 continue
             
-            text_en = attr_info["text_en"]
+            text_en = [v for k,v in attr_info["text_en"].items()]
             # 2. 处理目标标签，确保设备正确
             if isinstance(targets[attr], list):
                 target = torch.tensor(targets[attr], dtype=torch.long, device=image_embeddings.device)
@@ -156,6 +156,7 @@ class DualEncoder(PreTrainedModel):
             valid_image_embeds = image_embeddings[valid_mask]  # 有效图像嵌入
             valid_target = target[valid_mask]                  # 有效标签
             
+
             # 5. 生成文本嵌入并归一化
             text_inputs = tokenizer(
                 text_en, 
@@ -167,9 +168,7 @@ class DualEncoder(PreTrainedModel):
             text_embeddings = F.normalize(text_embeddings, dim=-1)   # 归一化
             
             # 6. 计算logits（仅用有效样本）
-            logits = logit_scale * (valid_image_embeds.float() @ text_embeddings.T.float())
-            
-            print(logits.shape)
+            logits = logit_scale_value * (valid_image_embeds.float() @ text_embeddings.T.float())
             # 7. 计算当前属性的损失（仅基于有效样本）
             l = focal_loss(logits, valid_target, alpha=alpha, gamma=gamma)
             
@@ -230,7 +229,7 @@ class DualEncoder(PreTrainedModel):
         
         #clip分类损失
         if self.attribute_classes:
-            clip_loss, clip_loss_dict=self.multi_clip_loss(tokenizer, all_vis_emb, targets)
+            clip_loss, clip_loss_dict=self.multi_clip_loss(tokenizer, vision_emb, targets)
             total_loss += clip_loss
             metrics.update(clip_loss_dict)
             
@@ -244,7 +243,7 @@ class DualEncoder(PreTrainedModel):
             for attr, classifier in self.attribute_classifiers.items():
                 if attr not in targets:
                     continue
-                logits = classifier(all_vis_emb)
+                logits = classifier(vision_emb)
                 valid_mask = (targets[attr] != -1)
                 if valid_mask.sum() == 0:
                     continue

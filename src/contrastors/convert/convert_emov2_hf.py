@@ -11,7 +11,7 @@ class EMO2ForEmbedding(PreTrainedModel):
         super().__init__(config)
         from contrastors.models.emov2 import MODEL  # 你实际用哪个模型就 import 哪个
         self.trunk = MODEL.get_module(config.image_model_args.model_name)(pretrained=False, num_classes=1000)
-        self.proj=nn.Linear(448,768)
+        self.proj=nn.Linear(200,768)
         
         self.attribute_classifiers = nn.ModuleDict()
         self.attribute_classes = {
@@ -82,13 +82,8 @@ def export_to_onnx(model, config, save_path="emo2.onnx"):
 
 
 def parse_args():
-<<<<<<< HEAD
-    ckpt_path="/data/yuesang/LLM/contrastors/src/ckpts/person/Mals/emov2-20m/epoch_0/model/"
-    save_dir="./emov2_hf-20m"
-=======
-    ckpt_path="/data/yuesang/LLM/contrastors/src/ckpts/person/pa-100k/emov2-2m/epoch_0_model/"
-    save_dir="./emov2_hf"
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分)
+    ckpt_path="/data/yuesang/LLM/contrastors/src/ckpts/person/Mals/emov2-distill-slip2/epoch_2_model/"
+    save_dir="./emov2_hf-20m-distill"
     config = DualEncoderConfig.from_pretrained(ckpt_path)
     model = DualEncoder.from_pretrained(ckpt_path, config=config)
     vision = model.vision

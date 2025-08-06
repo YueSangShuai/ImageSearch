@@ -36,8 +36,8 @@ data_args:
   # (TODO): zanussbaum up workers and check deterministic
   workers: 8 
   # this is per gpu batch size
-  batch_size: 256
-  eval_batch_size: 256
+  batch_size: 64
+  eval_batch_size: 64
   seed: 42
   shuffle: false
   imagenet_val_path: "/data/yuesang/LLM/contrastors/data/MALS/add/val.json"

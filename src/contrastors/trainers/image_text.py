@@ -218,9 +218,9 @@ class ImageTextTrainer(TextTextTrainer):
         vision_inputs = {k: v.to(model.device) for k, v in batch["vision"].items()}
         if batch.get("teacher_vision") is not None:
             teacher_vision_inputs={k: v.squeeze(1).to(dtype=model.dtype).to(model.device) for k, v in batch["teacher_vision"].items()}
-            outputs = model(text_inputs=text_inputs, vision_inputs=vision_inputs,targets=batch["label"],img_path=teacher_vision_inputs,tolenizer=self.tolenizer)
+            outputs = model(text_inputs=text_inputs, vision_inputs=vision_inputs,targets=batch["label"],img_path=teacher_vision_inputs,tokenizer=self.tokenizer)
         else:
-            outputs = model(text_inputs=text_inputs, vision_inputs=vision_inputs,targets=batch["label"],tolenizer=self.tolenizer)
+            outputs = model(text_inputs=text_inputs, vision_inputs=vision_inputs,targets=batch["label"],tokenizer=self.tokenizer)
         
         return outputs
 

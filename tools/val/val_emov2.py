@@ -11,12 +11,9 @@ import torch.nn as nn
 from transformers import PreTrainedModel
 from tqdm import tqdm
 import onnxruntime as ort
-<<<<<<< HEAD:tools/val/val_emov2.py
 import numpy as np 
 from tabulate import tabulate 
 import math
-=======
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):tools/val_emov2.py
 
 # 如果你使用的是 bicubic 插值
 bicubic = transforms.InterpolationMode.BICUBIC
@@ -397,7 +394,6 @@ class EVAL:
         print(f"[Eval] Step {step} | zero_shot/image_text_similarity: {sim_mean:.4f}")
 
         for name, acc in zero_shot_acc_dict.items():
-<<<<<<< HEAD:tools/val/val_emov2.py
                 stats = label_stats.get(name, {
                     "加载时有效的标签数": 0,
                     "加载时无效的标签数": 0,
@@ -432,12 +428,6 @@ class EVAL:
             print(f"[Eval] Step {step} | attr_/平均_top1: {attr_avg:.4f}")
 
 
-=======
-            print(f"[Eval] Step {step} | zero_shot/{name}_top1: {acc:.4f}")
-
-        for attr, acc in attr_acc_dict.items():
-            print(f"[Eval] Step {step} | attr_/{attr}_top1: {acc:.4f}")
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):tools/val_emov2.py
 
     def _compute_classifer_onnx(self, classification_outputs, all_labels):
         acc_dict = {}
@@ -613,7 +603,6 @@ class EVAL:
                 
         print("\n[属性分类精度及标签统计]")
         for attr, acc in attr_acc_dict.items():
-<<<<<<< HEAD:tools/val/val_emov2.py
                     stats = label_stats.get(attr, {
                         "加载时有效的标签数": 0,
                         "加载时无效的标签数": 0,
@@ -638,12 +627,8 @@ class EVAL:
         
         
         return zero_shot_acc_dict,attr_acc_dict
-=======
-            print(f"[Eval] Step {step} | attr_/{attr}_top1: {acc:.4f}")
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):tools/val_emov2.py
     
     def val(self):
-<<<<<<< HEAD:tools/val/val_emov2.py
         zero_shot_acc_dict,attr_acc_dict=self._eval_image_text_similarity(self.model, self.val_dataloader, 0)
               
     def val_onnx(self):
@@ -703,26 +688,15 @@ class EVAL:
         print(f"attr平均绝对误差: {np.mean(attr_diffs):.4f}")
         print(f"最大误差: {max(zero_shot_diffs + attr_diffs):.4f}")
         print("="*120)
-=======
-         self._eval_image_text_similarity(self.model, self.val_dataloader, 0)
-         
-    def val_onnx(self):
-        self._eval_image_text_similarity_onnx(self.model, self.val_dataloader, 0)
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):tools/val_emov2.py
          
         
         
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
-<<<<<<< HEAD:tools/val/val_emov2.py
-    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/Mals/emov2/epoch_3/model/")
+    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/Mals/emov2/epoch_50/model/")
     parser.add_argument("--yaml_path", type=str, default="/data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_vits.yaml")
-=======
-    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/pa-100k/emov2-2m/epoch_0_model")
-    parser.add_argument("--yaml_path", type=str, default="/data/yuesang/LLM/contrastors/src/contrastors/configs/train/nomic_pa-100k.yaml")
->>>>>>> parent of f0c4ccb (增加教师蒸馏部分):tools/val_emov2.py
     parser.add_argument("--onnx_path", type=str, default="/data/yuesang/LLM/contrastors/emov2_hf/emov2.onnx")
-    parser.add_argument('--device', type=str, default='cuda:0')
+    parser.add_argument('--device', type=str, default='cuda:1')
     args = parser.parse_args()
     eval=EVAL(args)
     eval.val()
