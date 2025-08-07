@@ -2,15 +2,10 @@ from torchvision import transforms
 import torch
 import yaml
 from contrastors.config import Config
-from contrastors.dataset.image_text_loader import get_local_image_text_dataset
 from transformers import AutoTokenizer
-import torch.nn.functional as F
-import argparse
 from contrastors.models.dual_encoder import DualEncoderConfig,DualEncoder
-from transformers import PreTrainedModel
-from tabulate import tabulate 
 from PIL import Image
-
+from safetensors.torch import load_file
 
 # 如果你使用的是 bicubic 插值
 bicubic = transforms.InterpolationMode.BICUBIC
@@ -47,14 +42,80 @@ class Emove_inference:
         config=read_config(args.yaml_path)
         self.text_args=config.text_model_args
         self.device=args.device
-        self.model = self.get_image_model(args.vision_model).to(self.device)
+        self.model = self.get_image_model(config,args.vision_model).to(self.device)
         self.model = self.model.to(dtype=torch.bfloat16)
-        self.tokenizer=AutoTokenizer.from_pretrained(self.text_args.model_name, local_files_only=True, trust_remote_code=True)
+        self.tokenizer=self.get_tokenizer(config)
+    
+    
+    def get_tokenizer(self, config):
+        config = config.text_model_args
+        tokenizer = AutoTokenizer.from_pretrained(config.tokenizer_name)
+        tokenizer.model_max_length = config.seq_len
+
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+
+        if tokenizer.cls_token is None:
+            tokenizer.add_special_tokens({"cls_token": "<s>"})
+
+        if tokenizer.mask_token is None:
+            tokenizer.add_special_tokens({"mask_token": "<mask>"})
+
+        return tokenizer
+    
+    def get_image_model(self,ckpt_path,modelsafe):
+        config = DualEncoderConfig(ckpt_path)
+        model = DualEncoder(config)
         
-    def get_image_model(self,ckpt_path):
-        config = DualEncoderConfig.from_pretrained(ckpt_path)
-        config = DualEncoderConfig.from_pretrained(ckpt_path)
-        model = DualEncoder.from_pretrained(ckpt_path, config=config)
+        state_dict = load_file(modelsafe, device="cpu")
+        # 检查模型状态字典与加载的权重匹配情况
+        model_state_dict = model.state_dict()
+        loaded_keys = set(state_dict.keys())
+        model_keys = set(model_state_dict.keys())
+        
+        
+        # 找出匹配的参数（名称和形状均一致）
+        matched_keys = []
+        mismatched_shape_keys = []
+        for key in loaded_keys & model_keys:
+            if state_dict[key].shape == model_state_dict[key].shape:
+                matched_keys.append(key)
+            else:
+                mismatched_shape_keys.append(key)
+
+        # 未在模型中找到的参数
+        unmatched_loaded_keys = loaded_keys - model_keys
+        # 模型中未被加载的参数
+        unmatched_model_keys = model_keys - loaded_keys
+
+        # 打印结果
+        print(f"成功加载的参数（{len(matched_keys)}个）：")
+        for key in sorted(matched_keys):
+            print(f"  - {key} (形状: {state_dict[key].shape})")
+
+        if mismatched_shape_keys:
+            print(f"\n形状不匹配的参数（{len(mismatched_shape_keys)}个）：")
+            for key in sorted(mismatched_shape_keys):
+                print(f"  - {key}: 权重形状{state_dict[key].shape} vs 模型形状{model_state_dict[key].shape}")
+
+        if unmatched_loaded_keys:
+            print(f"\n权重中存在但模型中不存在的参数（{len(unmatched_loaded_keys)}个）：")
+            for key in sorted(unmatched_loaded_keys):
+                print(f"  - {key}")
+
+        if unmatched_model_keys:
+            print(f"\n模型中存在但权重中不存在的参数（{len(unmatched_model_keys)}个）：")
+            for key in sorted(unmatched_model_keys):
+                print(f"  - {key}")
+
+        # 实际加载权重（可选，若尚未加载）
+        try:
+            model.load_state_dict(state_dict, strict=True)
+            print("\n权重加载完成（strict=True）")
+        except RuntimeError as e:
+            print(f"\n加载失败：{e}")
+        
+        
         return model
     
     def inference_image(self, img_path):

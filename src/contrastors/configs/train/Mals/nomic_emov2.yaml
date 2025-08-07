@@ -64,7 +64,7 @@ text_model_args:
 
 vision_model_args:
   model_type: "locked_text"
-  model_name: "EMO2_20M_k5_hybrid"
+  model_name: "EMO2_2M_k5_hybrid"
   pretrained: true
   pooling: "none"
   freeze: false

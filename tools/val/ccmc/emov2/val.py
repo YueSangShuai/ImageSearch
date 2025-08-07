@@ -192,10 +192,10 @@ if __name__ == '__main__':
                         help='Choose model type: mini (uses ImageFeatureExtractor/TextFeatureExtractor) or full (uses ImageTextEmbedder)')
     parser.add_argument('--sample_limit', type=int, default=1000,
                         help='Number of samples to process (0 for all)')
-    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/Mals/emov2-distill-slip2/epoch_0_model")
-    parser.add_argument("--yaml_path", type=str, default="/data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_vits.yaml")
+    parser.add_argument("--vision_model", type=str, default="/data/yuesang/LLM/contrastors/src/ckpts/person/Mals/emov2-distill-slip2/epoch_7_model/model.safetensors")
+    parser.add_argument("--yaml_path", type=str, default="/data/yuesang/LLM/contrastors/src/contrastors/configs/train/Mals/nomic_emov2.yaml")
+    parser.add_argument('--device', type=str, default='cuda:1')
     parser.add_argument("--onnx_path", type=str, default="/data/yuesang/LLM/contrastors/emov2_hf/emov2.onnx")
-    parser.add_argument('--device', type=str, default='cuda:0')
     
     
     args = parser.parse_args()

@@ -33,16 +33,16 @@ train_args:
   logit_max: 100
 
 data_args:
-  image_text_shards: "/data/yuesang/LLM/contrastors/data/MALS/test.json"
+  image_text_shards: "/data/yuesang/LLM/contrastors/data/pa100k_label/train.json"
   eval_flickr: false
   # (TODO): zanussbaum up workers and check deterministic
   workers: 8 
   # this is per gpu batch size
-  batch_size: 1
-  eval_batch_size: 1
+  batch_size: 2048
+  eval_batch_size: 2048
   seed: 42
   shuffle: false
-  imagenet_val_path: "/data/yuesang/LLM/contrastors/data/MALS/test.json"
+  imagenet_val_path: "/data/yuesang/LLM/contrastors/data/pa100k_label/val.json"
   dataset_resampled: false
   is_local: true
 

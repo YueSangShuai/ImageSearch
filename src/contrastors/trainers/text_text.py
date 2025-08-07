@@ -248,8 +248,6 @@ class TextTextTrainer(BaseTrainer):
 
         return {"train": train_dataloader, "val": nano_beir, "test": None}
 
-    
-
 
     def compare_model_with_safetensors(self,current_model, safetensors_path, eps=1e-6):
         """
